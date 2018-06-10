@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HUI</title>
+<link rel="stylesheet" type="text/css" href="./css/hui.css" />
+<style type="text/css">
+	.hui-tab-title div{width: 25%;}
+</style>
+</head>
+<body>
+<header class="hui-header">
+    <div id="hui-back"></div>
+    <div id="hui-header-sreach">
+        <div id="hui-header-sreach-icon"></div>
+        <form><input type="search" id="searchKey" onkeydown="if(event.keyCode==13)return false;" placeholder="请输入商品关键字" /></form>
+    </div>
+</header>
+<div class="hui-wrap">
+        <div class="hui-tab-title" id="cate">
+            <div class="hui-tab-active" onclick="changeCate(0)">驾车</div>
+            <div onclick="changeCate(1)">公交</div>
+            <div onclick="changeCate(2)">骑行</div>
+            <div onclick="changeCate(3)">步行</div>
+        </div>
+</div>
+
+<script src="./js/hui.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+var masap = 123;
+var subpages =new Array(
+
+	new Array('driving.html',{left:0,top:'92px',bottom:'0px'}),
+	new Array('transit.html',{left:'100%',top:'92px',bottom:'0px'}),
+	new Array('walking.html',{left:'200%',top:'92px',bottom:'0px'}),
+	new Array('bike.html',{left:'300%',top:'92px',bottom:'0px'})
+);
+hui.plusReady(function(){
+   hui.subpages(subpages);
+});
+function changeCate(index){ 
+	for(var i = 0; i<subpages.length;i++){
+		var view=hui.getView(subpages[i][0]);
+		var left=(i-index)*100+'%';
+		view.setStyle({left:left});
+	}
+ //选项状态激活
+ hui('#cate').find('div').removeClass('hui-tab-active');
+ hui('#cate').find('div').eq(index).addClass('hui-tab-active');
+
+	
+}
+hui('#searchKey').click(function(){
+	hui.open('serach.html');
+});
+</script>
+</body>
+</html>

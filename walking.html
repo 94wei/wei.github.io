@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HUI</title>
+<link rel="stylesheet" type="text/css" href="./css/hui.css" />
+</head>
+<body>
+ 
+<div class="hui-wrap">
+	<div class="hui-media-list" id="refreshContainer" style="padding:10px;">
+		<div class="hui-refresh-icon"></div>
+	    <ul id="minlist">
+	        
+	    </ul>
+	</div>
+</div>
+<script src="./js/hui.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/hui-refresh-load-more.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+hui.Back=null;
+hui.lazyLoad();
+var page=1,cate=18;
+hui.refresh('#refreshContainer',refreshlist);
+
+function refreshlist(){
+
+	hui.postJSON(
+		'http://shop.hcoder.net/myApi.php',
+		{act:"goodsList",page:1,cate:cate},
+		function (res){
+			var html="";
+			for(var i=0;i< res.msg.length;i++){
+				html +='<li><a href="javascript:showInfo('+res.msg[i].goods_id+')">'+
+	                '<div class="hui-media-list-img"><img src="http://shop.hcoder.net/'+res.msg[i].goods_thumb+'" /></div>'+
+	                '<div class="hui-media-content"><h1>'+res.msg[i].goods_name+'</h1><p>'+res.msg[i].shop_price+'</p></div></a></li>';
+			}
+			hui('#minlist').html(html);
+			hui.endRefresh();
+			hui.resetLoadMore();
+			page=2;
+
+		}
+	);
+}
+hui.loadMore(loadMore);
+function loadMore(){
+	hui.postJSON(
+		'http://shop.hcoder.net/myApi.php',
+		{act:"goodsList",page:page,cate:cate},
+		function (res){
+			if(res.msg == 'null'){
+				hui.endLoadMore(true); 
+				return false;
+			}
+			for(var i=0;i< res.msg.length;i++){
+				var li = document.createElement('li');
+				li.innerHTML='<li><a href="javascript:showInfo('+res.msg[i].goods_id+')">'+
+	                '<div class="hui-media-list-img"><img src="http://shop.hcoder.net/'+res.msg[i].goods_thumb+'" /></div>'+
+	                '<div class="hui-media-content"><h1>'+res.msg[i].goods_name+'</h1><p>'+res.msg[i].shop_price+'</p></div></a></li>';
+				hui(li).appendTo('#minlist');
+			}
+			page++;
+			
+			hui.endLoadMore();
+
+		}
+	);
+}
+//var nextPage={
+//	pageId:'bike.html',
+//	callBack:function(){
+//	var _index= plus.webview.getLaunchWebview();
+//	_index.evalJS(" hui('#cate').find('div').removeClass('hui-tab-active');hui('#cate').find('div').eq(3).addClass('hui-tab-active');");	
+//	}
+//};
+//var prevPage={
+//	pageId:'transit.html',
+//	callBack:function(){
+//	var _index= plus.webview.getLaunchWebview();
+//	_index.evalJS(" hui('#cate').find('div').removeClass('hui-tab-active');hui('#cate').find('div').eq(1).addClass('hui-tab-active');");	
+//	}
+//}
+//hui.plusReady(function(){
+//	hui.drag(prevPage,nextPage); 
+//});
+</script>
+</body>
+</html>

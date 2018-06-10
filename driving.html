@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HUI</title>
+<link rel="stylesheet" type="text/css" href="./css/hui.css" />
+</head>
+<body>
+<div class="hui-wrap">
+	<div class="hui-media-list" id="refreshContainer" style="padding:10px;">
+		<div class="hui-refresh-icon"></div>
+	    <ul id="minlist">
+	        
+	    </ul>
+	</div>
+</div>
+
+<div id="map"></div>
+<script src="./js/hui.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/hui-refresh-load-more.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	var map,center,search,startCity;
+	hui.Back=null;
+	document.addEventListener('plusready',function(){
+		var winHeight = document.documentElement.clientHeight;
+	    document.getElementById('map').style.height = (winHeight-220)+'px';
+	    showMap();
+	    plus.nativeUI.showWaiting();
+	    drivingSearch(); 
+	});
+	function showMap(){
+	 	map = new plus.maps.Map("map");
+		map.setZoom(16);
+		map.showUserLocation(true);
+		map.getUserLocation(function(state,point){
+//			center = new plus.maps.Point(point.longitude,point.latitude);
+//			map.setCenter(center);
+		});
+		//获取用户位置信息
+		plus.geolocation.getCurrentPosition(
+			function(p){
+				startCity = p.address.city;
+			},
+			function(){
+				alert('获取本地信息失败');// 
+			} 
+		);
+	};
+	function drivingSearch(){
+		// 检索从北京天安门到大钟寺的驾车线路
+		var searchObj = new plus.maps.Search( map );
+		searchObj.onRouteSearchComplete = function ( state, result ) {
+			console.log(JSON.stringify(result));
+			if ( state == 0 ) {
+				if ( result.routeNumber <= 0 ) {
+					alert( "没有检索到结果" );
+				}
+				for(var i=0; i<result.routeNumber; i++){
+					map.addOverlay( result.getRoute( i ) );
+				}
+			} else {
+				alert( "检索失败" );
+			}
+		}
+		searchObj.drivingSearch( "天安门", "北京", "大钟寺", "北京" );
+		plus.nativeUI.closeWaiting();
+		
+	}
+	
+</script> 
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>HUI</title>
+<link rel="stylesheet" type="text/css" href="./css/hui.css" />
+<style type="text/css">
+	#serach{position: relative;}
+	#form{width: 100%;}
+</style>
+</head>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=hWqkTD020sj4yIih2e1zZPvVwg2MriIv"></script>
+<body>
+<header class="hui-header"  id="serach">
+    <div id="hui-header-sreach">
+		<form id="form"><input type="search" id="searchKey"   onkeydown="if(event.keyCode==13)return false;" placeholder="搜地点、查公交、找路线" /></form>
+	</div>
+	<div class="hui-header-sreach-txt" onclick="searchval();">搜索</div>  
+</header>
+<div class="hui-warp"  id="nav">
+
+		<div class="hui-media-list" id="refreshmain" style="padding:10px;">
+		<div class="hui-refresh-icon"></div>
+		    <ul id="mainlist"></ul>
+		</div>
+</div>
+
+<div id="map"></div>
+<script src="./js/hui.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/hui-refresh-load-more.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	var map,address,val,point;
+	var page = 0;
+	document.addEventListener('plusready',function(){
+		var winHeight = document.documentElement.clientHeight;
+    	document.getElementById('map').style.height = (winHeight-110)+'px';
+    	hui('#map').hide();
+   		showMap();
+   		
+	});
+//	//调用百度地图
+	function showMap(){
+	 	map = new plus.maps.Map("map");
+	 	map.hide();
+		map.setZoom(16);
+		map.showUserLocation(true);
+		map.getUserLocation(function(state,point){
+			center = new plus.maps.Point(point.longitude,point.latitude);
+			console.log(JSON.stringify(center))
+		});
+		//获取用户位置信息
+		plus.geolocation.getCurrentPosition(
+			function(p){
+				address =  p.addresses;
+			},
+			function(){
+				alert('获取本地信息失败');//
+			} 
+		);
+	}; 
+	//搜索
+	function searchval(){
+		 val = document.getElementById('searchKey').value;
+		if(val == ''){
+			plus.nativeUI.toast('请输入搜索地址');
+			return;
+		}
+		mapSearch(val);	
+	}
+	//检索事件
+	function mapSearch(val){
+		// 将检索到结果作为标点添加到地图中
+		var searchObj = new plus.maps.Search( val );
+		searchObj.onPoiSearchComplete = function( state, result ){
+			if ( state == 0 ) {
+				if ( result.currentNumber <= 0 ) {
+					alert( "没有检索到结果" );
+				}
+				var serval = result.poiList;   //返回的搜索信息列表
+				var html = '';
+				for(var i=0; i < serval.length; i++){
+					point = serval[i].point;
+					html += '<li><a href="javascript:aClick()" >'+
+			    			'<div class="hui-media-content hui-media-content-left"><h1>'+serval[i].name+'</h1>'+
+			    			'<input><h1>'+serval[i].name+'</h1>'+
+			    			
+			    			'</div><div class="hui-media-list-img"><img src="./img/1522661665.png" /></div>'+
+			    			'</div></a></li>';
+			    		
+				}
+				hui('#mainlist').html(html);
+				page++;
+			} else {
+				alert( "检索失败" );
+			}
+		}
+		searchObj.poiSearchNearBy( val, center, 2000 ); 
+	}
+hui.loadMore(getMore);
+//加载更多
+function getMore(){
+	if(page == 0 ){
+		hui.endLoadMore();
+		return false;
+	}	
+	var searchObj = new plus.maps.Search( val );
+	searchObj.onPoiSearchComplete = function( state, result ){
+		if ( state == 0 ) {
+			if ( result.currentNumber <= 0 ) {
+				alert( "没有检索到结果" );
+			}
+			if(result.poiList == null){
+                hui.endLoadMore(true, '已经到头了...');
+                return false;
+       		}
+			var serval = result.poiList;   //返回的搜索信息列表
+			var html = '';
+			for(var i=0; i < serval.length; i++){ 
+                var li = document.createElement('li');
+                li.innerHTML = '<li><a href="javascript:void(0)" onclick="aClick()" ><div class="hui-media-content"><h1>'+serval[i].name+'</h1><p>'+serval[i].name+'/p></div><div class="hui-media-list-img"><img src="./img/1522661665.png" /></div></a></li>';
+            	hui(li).appendTo('#mainlist'); 
+            }
+            page++;
+            hui.endLoadMore();			
+		} else {
+			alert( "检索失败" );
+		}
+	}
+	searchObj.poiSearchNearBy( val, center, 2000 ,page); 
+}
+	function aClick(e){
+
+	}
+</script>
+</body>
+</html>
